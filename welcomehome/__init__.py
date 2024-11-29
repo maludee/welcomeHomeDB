@@ -1,7 +1,9 @@
 import os
+import pymysql
+pymysql.install_as_MySQLdb()
 
 from flask import Flask
-from flask_mysqldb import MySQL
+# from flask_mysqldb import MySQL
 from flask_login import LoginManager
 def create_app(test_config=None):
     # create and configure the app
