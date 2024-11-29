@@ -2,14 +2,16 @@ import click
 from flask import current_app, g
 import mysql.connector.cursor
 from mysql.connector import Error
+
+
 def get_db():
-    if 'db' not in g:
+    if "db" not in g:
         try:
             g.db = mysql.connector.connect(
-                host=current_app.config['MYSQL_HOST'],
-                user=current_app.config['MYSQL_USER'],
-                password=current_app.config['MYSQL_PASSWORD'],
-                database=current_app.config['MYSQL_DB']
+                host=current_app.config["MYSQL_HOST"],
+                user=current_app.config["MYSQL_USER"],
+                password=current_app.config["MYSQL_PASSWORD"],
+                database=current_app.config["MYSQL_DB"],
             )
             g.db.row_factory = mysql.connector.cursor.MySQLCursorDict
         except Error as e:
@@ -23,24 +25,26 @@ def get_db():
 
 
 def close_db(e=None):
-    db = g.pop('db', None)
+    db = g.pop("db", None)
 
     if db is not None:
         db.close()
 
+
 def init_db():
     db = get_db()
-    with current_app.open_resource('schema.sql') as f:
+    with current_app.open_resource("schema.sql") as f:
         cursor = db.cursor()
-        sql_script = f.read().decode('utf8')
+        sql_script = f.read().decode("utf8")
         cursor.execute(sql_script)
         cursor.close()
 
 
-@click.command('init-db')
+@click.command("init-db")
 def init_db_command():
     init_db()
-    click.echo('Initialized the database.')
+    click.echo("Initialized the database.")
+
 
 def init_app(app):
     app.teardown_appcontext(close_db)
