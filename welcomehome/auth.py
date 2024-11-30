@@ -47,6 +47,7 @@ def create_auth_blueprint(login_manager: LoginManager):
         if request.method == "POST":
             username = request.form["username"]
             password = request.form["password"]
+            role = request.form["role"]
             first_name = request.form["first_name"]
             last_name = request.form["last_name"]
             billing_address = request.form["billing_address"]
@@ -60,6 +61,8 @@ def create_auth_blueprint(login_manager: LoginManager):
                 error = "Username is required."
             elif not password:
                 error = "Password is required."
+            elif not role:
+                error = "Role is required."
             elif (not first_name) or (not last_name):
                 error = "Name is required."
             elif not billing_address:
@@ -71,11 +74,12 @@ def create_auth_blueprint(login_manager: LoginManager):
                 print("here")
                 try:
                     cursor.execute(
-                        "INSERT INTO user (first_name, last_name, username, password, billAddr) "
-                        "VALUES (%s, %s, %s, %s, %s)",
+                        "INSERT INTO user (first_name, last_name, role, username, password, billAddr) "
+                        "VALUES (%s, %s, %s, %s, %s, %s)",
                         (
                             first_name,
                             last_name,
+                            role,
                             username,
                             generate_password_hash(password),
                             billing_address,

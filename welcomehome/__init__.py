@@ -18,7 +18,7 @@ def create_app(test_config=None):
     app.config["MYSQL_HOST"] = "localhost"
     app.config["MYSQL_USER"] = "root"
     app.config["MYSQL_PASSWORD"] = "yourpasswdhere"
-    app.config["MYSQL_DB"] = "yourdbhere"
+    app.config["MYSQL_DB"] = "welcomeHomeProject"
     if test_config is None:
         # load the instance config, if it exists, when not testing
         app.config.from_pyfile("config.py", silent=True)
