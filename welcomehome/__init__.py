@@ -6,7 +6,7 @@ pymysql.install_as_MySQLdb()
 from flask import Flask
 
 # from flask_mysqldb import MySQL
-from flask_login import LoginManager
+from flask_login import LoginManager, login_required
 from dotenv import load_dotenv
 load_dotenv()
 
@@ -52,5 +52,20 @@ def create_app(test_config=None):
     @app.route("/hello")
     def hello():
         return "Hello, World!"
+    
+    @app.route("/find_item", methods=("GET", "POST"))
+    @login_required
+    def find_item():
+        return "Finding an item..."
+    
+    @app.route("/find_order", methods=("GET", "POST"))
+    @login_required
+    def find_order():
+        return "Finding an order..."
+    
+    @app.route("/accept_donation", methods=("GET", "POST"))
+    @login_required
+    def accept_donation():
+        return "Accepting a donation..."
 
     return app
