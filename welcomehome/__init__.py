@@ -7,6 +7,8 @@ from flask import Flask
 
 # from flask_mysqldb import MySQL
 from flask_login import LoginManager
+from dotenv import load_dotenv
+load_dotenv()
 
 
 def create_app(test_config=None):
@@ -15,10 +17,12 @@ def create_app(test_config=None):
     app.config.from_mapping(
         SECRET_KEY="dev",
     )
-    app.config["MYSQL_HOST"] = "localhost"
-    app.config["MYSQL_USER"] = "root"
-    app.config["MYSQL_PASSWORD"] = "yourpasswdhere"
-    app.config["MYSQL_DB"] = "welcomeHomeProject"
+    app.config["MYSQL_HOST"] = os.environ.get("MYSQL_HOST")
+    app.config["MYSQL_USER"] = os.environ.get("MYSQL_USER")
+    app.config["MYSQL_PASSWORD"] = os.environ.get("MYSQL_PASSWORD")
+    app.config["MYSQL_DB"] = os.environ.get("MYSQL_DB")
+    app.config["MYSQL_PORT"] = os.environ.get("MYSQL_PORT")
+    app.config["SECRET_KEY"] = os.environ.get("SECRET_KEY")
     if test_config is None:
         # load the instance config, if it exists, when not testing
         app.config.from_pyfile("config.py", silent=True)

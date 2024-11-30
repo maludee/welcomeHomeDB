@@ -113,7 +113,7 @@ def create_auth_blueprint(login_manager: LoginManager):
             user = cursor.fetchone()
             if user is None:
                 error = "Non-existing username"
-            elif not check_password_hash(user[4], password):
+            elif not check_password_hash(user[5], password):
                 error = "Incorrect password."
 
             if error is None:
