@@ -54,12 +54,13 @@ def create_app(test_config=None):
     def hello():
         return "Hello, World!"
 
-    @app.route("/find_item")
-    def find_item():
-        return render_template("find_item.html")
+    # @app.route("/find_item")
+    # def find_item():
+    #     return render_template("find_item.html")
 
-    @app.route("/find_item", methods=["POST"])
-    def find_item_post():
+    @app.route("/find_item", methods=("GET", "POST"))
+    @login_required
+    def find_item():
         # user = session #TODO
         item_id = request.form["item_id"]
         database = db.get_db()

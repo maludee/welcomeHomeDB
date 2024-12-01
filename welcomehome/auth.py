@@ -36,8 +36,6 @@ def create_auth_blueprint(login_manager: LoginManager):
         cursor.execute("SELECT * FROM Person WHERE username = %s", (username,))
         columns = [column[0] for column in cursor.description]
         res = cursor.fetchone()
-        if not res:
-            return None
         res_dict = dict(zip(columns, res))
         if len(res_dict) == 0:
             return None
@@ -55,7 +53,6 @@ def create_auth_blueprint(login_manager: LoginManager):
             last_name = request.form["last_name"]
             email = request.form["email"]
             db = get_db()
-            print(db)
             error = None
             cursor = db.cursor()
             cursor.execute("SELECT 1 FROM Person WHERE username = %s", (username,))
@@ -74,7 +71,6 @@ def create_auth_blueprint(login_manager: LoginManager):
                 error = f"User {username} is already registered."
 
             if error is None:
-                print("here")
                 try:
                     cursor.execute(
                         "INSERT INTO Person (username, password, fname, lname, email) "
@@ -116,13 +112,11 @@ def create_auth_blueprint(login_manager: LoginManager):
             error = None
             cursor.execute("SELECT * FROM Person WHERE username = %s", (username,))
             columns = [column[0] for column in cursor.description]
-            print(columns)
             user = cursor.fetchone()
             if user is None:
                 error = "Non-existing username"
             elif not check_password_hash(user[1], password):
                 error = "Incorrect password."
-
             if error is None:
                 res_dict = dict(zip(columns, user))
                 username = res_dict.get("username")
@@ -130,7 +124,6 @@ def create_auth_blueprint(login_manager: LoginManager):
                 login_user(wrapped_user)
                 return redirect(url_for("auth.index"))  # change to your main page here
             flash(error)
-
         return render_template("auth/login.html")
 
     @bp.route("/logout")
