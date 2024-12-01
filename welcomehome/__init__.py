@@ -56,6 +56,8 @@ def create_app(test_config=None):
     @app.route("/find_item", methods=("GET", "POST"))
     @login_required
     def find_item():
+        database = db.get_db()
+        cursor = database.cursor()
         return "Finding an item..."
     
     @app.route("/find_order", methods=("GET", "POST"))
