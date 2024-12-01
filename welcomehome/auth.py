@@ -17,9 +17,11 @@ from flask_login import login_user, logout_user, current_user, login_required
 
 # Define your User class that extends UserMixin
 class User(UserMixin):
-    def __init__(self, user_id, username):
-        self.id = user_id
+    def __init__(self, username):
         self.username = username
+
+    def get_id(self):
+        return self.username
 
 
 def create_auth_blueprint(login_manager: LoginManager):
@@ -28,19 +30,20 @@ def create_auth_blueprint(login_manager: LoginManager):
     # login_manager.init_app(current_app)
 
     @login_manager.user_loader
-    def load_user(user_id):
+    def load_user(username):
         db = get_db()
         cursor = db.cursor()
-        cursor.execute("SELECT * FROM user WHERE cid = %s", (user_id,))
+        cursor.execute("SELECT * FROM Person WHERE username = %s", (username,))
         columns = [column[0] for column in cursor.description]
         res = cursor.fetchone()
+        if not res:
+            return None
         res_dict = dict(zip(columns, res))
         if len(res_dict) == 0:
             return None
         else:
-            user_id = res_dict.get("cid")
             username = res_dict.get("username")
-            return User(user_id, username)
+            return User(username)
 
     @bp.route("/register", methods=("GET", "POST"))
     def register():
@@ -50,12 +53,12 @@ def create_auth_blueprint(login_manager: LoginManager):
             role = request.form["role"]
             first_name = request.form["first_name"]
             last_name = request.form["last_name"]
-            billing_address = request.form["billing_address"]
+            email = request.form["email"]
             db = get_db()
             print(db)
             error = None
             cursor = db.cursor()
-            cursor.execute("SELECT 1 FROM user WHERE username = %s", (username,))
+            cursor.execute("SELECT 1 FROM Person WHERE username = %s", (username,))
             existing_user = cursor.fetchone()
             if not username:
                 error = "Username is required."
@@ -65,8 +68,8 @@ def create_auth_blueprint(login_manager: LoginManager):
                 error = "Role is required."
             elif (not first_name) or (not last_name):
                 error = "Name is required."
-            elif not billing_address:
-                error = "Billing Address is required."
+            elif not email:
+                error = "email address is required."
             elif existing_user:
                 error = f"User {username} is already registered."
 
@@ -74,16 +77,21 @@ def create_auth_blueprint(login_manager: LoginManager):
                 print("here")
                 try:
                     cursor.execute(
-                        "INSERT INTO user (first_name, last_name, role, username, password, billAddr) "
-                        "VALUES (%s, %s, %s, %s, %s, %s)",
+                        "INSERT INTO Person (username, password, fname, lname, email) "
+                        "VALUES (%s, %s, %s, %s, %s)",
                         (
-                            first_name,
-                            last_name,
-                            role,
                             username,
                             generate_password_hash(password),
-                            billing_address,
+                            first_name,
+                            last_name,
+                            email,
                         ),
+                    )
+                    db.commit()
+                    cursor.execute(
+                        "INSERT INTO act (username, roleID) "
+                        "VALUES (%s, %s)",
+                        (username, role),
                     )
                     db.commit()
                 except mysql.connector.IntegrityError:
@@ -107,20 +115,19 @@ def create_auth_blueprint(login_manager: LoginManager):
             db = get_db()
             cursor = db.cursor()
             error = None
-            cursor.execute("SELECT * FROM user WHERE username = %s", (username,))
+            cursor.execute("SELECT * FROM Person WHERE username = %s", (username,))
             columns = [column[0] for column in cursor.description]
             print(columns)
             user = cursor.fetchone()
             if user is None:
                 error = "Non-existing username"
-            elif not check_password_hash(user[5], password):
+            elif not check_password_hash(user[1], password):
                 error = "Incorrect password."
 
             if error is None:
                 res_dict = dict(zip(columns, user))
-                user_id = res_dict.get("cid")
                 username = res_dict.get("username")
-                wrapped_user = User(user_id, username)
+                wrapped_user = User(username)
                 login_user(wrapped_user)
                 return redirect(url_for("auth.index"))  # change to your main page here
             flash(error)

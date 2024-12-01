@@ -3,7 +3,7 @@ import pymysql
 
 pymysql.install_as_MySQLdb()
 
-from flask import Flask
+from flask import Flask, render_template, request, session
 
 # from flask_mysqldb import MySQL
 from flask_login import LoginManager, login_required
@@ -54,10 +54,17 @@ def create_app(test_config=None):
         return "Hello, World!"
     
     @app.route("/find_item", methods=("GET", "POST"))
-    @login_required
     def find_item():
+        user = session #TODO
         database = db.get_db()
         cursor = database.cursor()
+        item_id =request.form['itemID']
+        query = (f"""SELECT itemID, pieceNum, pDescription, roomNum, shelfNum, pNotes 
+                   FROM Piece 
+                   WHERE itemID = {item_id}""")
+        cursor.execute(query, (user))
+        data = cursor.fetchall()
+        cursor.close()
         return "Finding an item..."
     
     @app.route("/find_order", methods=("GET", "POST"))
