@@ -53,19 +53,24 @@ def create_app(test_config=None):
     def hello():
         return "Hello, World!"
     
-    @app.route("/find_item", methods=("GET", "POST"))
+    @app.route("/find_item")
     def find_item():
-        user = session #TODO
+        return render_template("find_item.html")
+    
+    @app.route("/find_item", methods=["POST"])
+    def find_item_post():
+        # user = session #TODO
+        item_id = request.form['item_id']
         database = db.get_db()
         cursor = database.cursor()
-        item_id =request.form['itemID']
         query = (f"""SELECT itemID, pieceNum, pDescription, roomNum, shelfNum, pNotes 
                    FROM Piece 
                    WHERE itemID = {item_id}""")
-        cursor.execute(query, (user))
+        # cursor.execute(query, (user))
+        cursor.execute(query)
         data = cursor.fetchall()
         cursor.close()
-        return "Finding an item..."
+        return render_template('find_item.html',data=data)
     
     @app.route("/find_order", methods=("GET", "POST"))
     @login_required

@@ -1,9 +1,31 @@
 <html>
     <body>
-        <form action="/find_item" method="GET">
+        <p>Enter an item ID to locate an item: </p>
+        <form action="/find_item" method="POST">
             <input type = "text" name="item_id" required/></br>
-            <input type = "submit" value= "Item ID">
+            <input type = "submit">
 
         </form>
+        <!-- https://python-adv-web-apps.readthedocs.io/en/latest/flask_db2.html -->
+        <table class="table">
+			<tr>
+				<th>itemID</th>
+				<th>pieceNum</th>
+				<th>pDescription</th>
+				<th>roomNum</th>
+				<th>shelfNum</th>
+				<th>pNotes</th>
+			</tr>
+            {% for item in data %}
+            <tr>
+                <td>{{item[0]}}</td>
+                <td>{{item[1]}}</td>
+                <td>{{item[2]}}</td>
+                <td>{{item[3]}}</td>
+                <td>{{item[4]}}</td>
+                <td>{{item[5]}}</td>
+            </tr>
+            {% endfor %}
+        </table>
     </body>
 </html>
