@@ -3,10 +3,10 @@ import pymysql
 
 pymysql.install_as_MySQLdb()
 
-from flask import Flask, render_template, request, session
+from flask import Flask, render_template, request
 
 # from flask_mysqldb import MySQL
-from flask_login import LoginManager, login_required
+from flask_login import LoginManager, login_required, current_user
 from dotenv import load_dotenv
 
 load_dotenv()
@@ -54,30 +54,52 @@ def create_app(test_config=None):
     def hello():
         return "Hello, World!"
 
-    # @app.route("/find_item")
-    # def find_item():
-    #     return render_template("find_item.html")
-
     @app.route("/find_item", methods=("GET", "POST"))
     @login_required
     def find_item():
-        # user = session #TODO
-        item_id = request.form["item_id"]
-        database = db.get_db()
-        cursor = database.cursor()
-        query = f"""SELECT itemID, pieceNum, pDescription, roomNum, shelfNum, pNotes 
-                   FROM Piece 
-                   WHERE itemID = {item_id}"""
-        # cursor.execute(query, (user))
-        cursor.execute(query)
-        data = cursor.fetchall()
-        cursor.close()
-        return render_template("find_item.html", data=data)
+        if request.method == "POST":
+        # user = current_user.username 
+            item_id = request.form["item_id"]
+            database = db.get_db()
+            cursor = database.cursor()
+            query = f"""SELECT itemID, pieceNum, pDescription, roomNum, shelfNum, pNotes 
+                    FROM Piece 
+                    WHERE itemID = {item_id}"""
+            # cursor.execute(query, (user))
+            cursor.execute(query)
+            data = cursor.fetchall()
+            cursor.close()
+            return render_template("find_item.html", data=data)
+        else:
+            return render_template("find_item.html")
 
     @app.route("/find_order", methods=("GET", "POST"))
     @login_required
     def find_order():
-        return "Finding an order..."
+        if request.method == "POST":
+            order_id = request.form['order_id']
+            database = db.get_db()
+            cursor = database.cursor()
+            query = f"""SELECT orderID, 
+                               itemID,
+                               pieceNum, 
+                               pDescription, 
+                               roomNum, 
+                               shelfNum, 
+                               shelfDescription,
+                               mainCategory,
+                               subCategory
+                        FROM Piece
+                        NATURAL JOIN Item
+                        NATURAL JOIN location
+                        NATURAL JOIN ItemIn
+                        WHERE orderID = {order_id}"""
+            cursor.execute(query)
+            data = cursor.fetchall()
+            cursor.close()
+            return render_template("find_order.html", data=data)
+        else:
+            return render_template("find_order.html")
 
     @app.route("/accept_donation", methods=("GET", "POST"))
     @login_required

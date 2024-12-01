@@ -1,76 +1,140 @@
-DROP TABLE IF EXISTS Customer_Service;
-DROP TABLE IF EXISTS customer;
-DROP TABLE IF EXISTS Datas;
-DROP TABLE IF EXISTS Device;
-DROP TABLE IF EXISTS ServiceLocation;
-DROP TABLE IF EXISTS Model;
-DROP TABLE IF EXISTS Price;
-DROP TABLE IF EXISTS user;
+CREATE TABLE Category (
+    mainCategory VARCHAR(50) NOT NULL,
+    subCategory VARCHAR(50) NOT NULL,
+    catNotes TEXT,
+    PRIMARY KEY (mainCategory, subCategory)
+);
 
-CREATE TABLE user
-(
-    cid        INT PRIMARY KEY AUTO_INCREMENT,
-    first_name VARCHAR(50)        NOT NULL,
-    last_name  VARCHAR(50)        NOT NULL,
-    username   VARCHAR(50) UNIQUE NOT NULL,
-    password   VARCHAR(1000)      NOT NULL,
-    billAddr   VARCHAR(4000)      NOT NULL
+CREATE TABLE Item (
+    ItemID INT NOT NULL AUTO_INCREMENT,
+    iDescription TEXT,
+    photo BLOB, -- BLOB is better here, but for simplicity, we change it to VARCHAR; For p3 implementation, we recommend you to implement as blob
+    color VARCHAR(20),
+    isNew BOOLEAN DEFAULT TRUE,
+    hasPieces BOOLEAN,
+    material VARCHAR(50),
+    mainCategory VARCHAR(50) NOT NULL,
+    subCategory VARCHAR(50) NOT NULL,
+    PRIMARY KEY (ItemID),
+    FOREIGN KEY (mainCategory, subCategory) REFERENCES Category(mainCategory, subCategory)
+        ON UPDATE CASCADE
+        ON DELETE CASCADE 
 );
 
 
-CREATE TABLE ServiceLocation
-(
-    sLid          INT PRIMARY KEY AUTO_INCREMENT,
-    addr          VARCHAR(50) NOT NULL,
-    zipcode       INT         NOT NULL,
-    unitNumber    VARCHAR(20) NOT NULL,
-    tookOverDate  DATE        NOT NULL,
-    squareFootage INT         NOT NULL,
-    bedroomCnt    INT         NOT NULL,
-    occupantsCnt  INT         NOT NULL
+CREATE TABLE Person (
+    username VARCHAR(50) NOT NULL,
+    password VARCHAR(255) NOT NULL,
+    fname VARCHAR(50) NOT NULL,
+    lname VARCHAR(50) NOT NULL,
+    email VARCHAR(100) NOT NULL,
+    PRIMARY KEY (userName)
 );
 
-CREATE TABLE Customer_Service
-(
-    cid  INT,
-    sLid INT,
-    PRIMARY KEY (cid, sLid),
-    FOREIGN KEY (cid) REFERENCES user (cid),
-    FOREIGN KEY (sLid) REFERENCES ServiceLocation (sLid)
-);
-CREATE TABLE Model
-(
-    modelid    INT PRIMARY KEY AUTO_INCREMENT,
-    modeltype  VARCHAR(50) NOT NULL,
-    modelname  VARCHAR(50) NOT NULL,
-    properties VARCHAR(200)
+CREATE TABLE PersonPhone (
+    userName VARCHAR(50) NOT NULL,
+    phone VARCHAR(20) NOT NULL,
+    PRIMARY KEY (userName, phone),
+    FOREIGN KEY (userName) REFERENCES Person(userName)
 );
 
-CREATE TABLE Device
-(
-    deviceid INT PRIMARY KEY AUTO_INCREMENT,
-    type     VARCHAR(100) NOT NULL,
-    modelid  INT,
-    SLid     INT,
-    FOREIGN KEY (modelid) REFERENCES Model (modelid),
-    FOREIGN KEY (sLid) REFERENCES ServiceLocation (sLid)
+CREATE TABLE DonatedBy (
+    ItemID INT NOT NULL,
+    userName VARCHAR(50) NOT NULL,
+    donateDate DATE NOT NULL,
+    PRIMARY KEY (ItemID, userName),
+    FOREIGN KEY (ItemID) REFERENCES Item(ItemID)
+        ON UPDATE CASCADE
+        ON DELETE CASCADE,
+    FOREIGN KEY (userName) REFERENCES Person(userName)
 );
 
-CREATE TABLE Datas
-(
-    dataid     INT PRIMARY KEY AUTO_INCREMENT,
-    deviceid   INT,
-    timestamp  DATETIME    NOT NULL,
-    eventLabel VARCHAR(20) NOT NULL,
-    value      FLOAT,
-    FOREIGN KEY (deviceid) REFERENCES Device (deviceid)
+CREATE TABLE Role (
+    roleID VARCHAR(20) NOT NULL,
+    rDescription VARCHAR(100),
+    PRIMARY KEY (roleID)
 );
 
-CREATE TABLE Price
-(
-    fromtime TIME  NOT NULL,
-    endtime  TIME  NOT NULL,
-    zipcode  INT   NOT NULL,
-    price    FLOAT NOT NULL,
-    PRIMARY KEY (fromtime, endtime, zipcode)
+CREATE TABLE Act (
+    userName VARCHAR(50) NOT NULL,
+    roleID VARCHAR(20) NOT NULL,
+    PRIMARY KEY (userName, roleID),
+    FOREIGN KEY (userName) REFERENCES Person(userName)
+        ON UPDATE CASCADE
+        ON DELETE CASCADE,
+    FOREIGN KEY (roleID) REFERENCES Role(roleID)
+        ON UPDATE CASCADE
+        ON DELETE CASCADE
+);
+
+CREATE TABLE Location (
+    roomNum INT NOT NULL,
+    shelfNum INT NOT NULL, -- not a point for deduction
+    shelf VARCHAR(20),
+    shelfDescription VARCHAR(200),
+    PRIMARY KEY (roomNum, shelfNum)
+);
+
+
+
+CREATE TABLE Piece (
+    ItemID INT NOT NULL,
+    pieceNum INT NOT NULL,
+    pDescription VARCHAR(200),
+    length INT NOT NULL, -- for simplicity
+    width INT NOT NULL,
+    height INT NOT NULL,
+    roomNum INT NOT NULL,
+    shelfNum INT NOT NULL, 
+    pNotes TEXT,
+    PRIMARY KEY (ItemID, pieceNum),
+    FOREIGN KEY (ItemID) REFERENCES Item(ItemID)
+        ON UPDATE CASCADE
+        ON DELETE CASCADE,
+    FOREIGN KEY (roomNum, shelfNum) REFERENCES Location(roomNum, shelfNum)
+        ON UPDATE CASCADE
+        ON DELETE CASCADE
+);
+
+CREATE TABLE Ordered (
+    orderID INT NOT NULL AUTO_INCREMENT,
+    orderDate DATE NOT NULL,
+    orderNotes VARCHAR(200),
+    supervisor VARCHAR(50) NOT NULL,
+    client VARCHAR(50) NOT NULL,
+    PRIMARY KEY (orderID),
+    FOREIGN KEY (supervisor) REFERENCES Person(userName)
+        ON UPDATE CASCADE
+        ON DELETE CASCADE,
+    FOREIGN KEY (client) REFERENCES Person(userName)
+        ON UPDATE CASCADE
+        ON DELETE CASCADE
+);
+
+CREATE TABLE ItemIn (
+    ItemID INT NOT NULL,
+    orderID INT NOT NULL,
+    found BOOLEAN DEFAULT FALSE,
+    PRIMARY KEY (ItemID, orderID),
+    FOREIGN KEY (ItemID) REFERENCES Item(ItemID)
+        ON UPDATE CASCADE
+        ON DELETE CASCADE,
+    FOREIGN KEY (orderID) REFERENCES Ordered(orderID)
+        ON UPDATE CASCADE
+        ON DELETE CASCADE
+);
+
+
+CREATE TABLE Delivered (
+    userName VARCHAR(50) NOT NULL,
+    orderID INT NOT NULL,
+    status VARCHAR(20) NOT NULL,
+    date DATE NOT NULL,
+    PRIMARY KEY (userName, orderID),
+    FOREIGN KEY (userName) REFERENCES Person(userName)
+        ON UPDATE CASCADE
+        ON DELETE CASCADE,
+    FOREIGN KEY (orderID) REFERENCES Ordered(orderID)
+        ON UPDATE CASCADE
+        ON DELETE CASCADE
 );

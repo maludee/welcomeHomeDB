@@ -36,6 +36,8 @@ def create_auth_blueprint(login_manager: LoginManager):
         cursor.execute("SELECT * FROM Person WHERE username = %s", (username,))
         columns = [column[0] for column in cursor.description]
         res = cursor.fetchone()
+        if not res:
+            return None
         res_dict = dict(zip(columns, res))
         if len(res_dict) == 0:
             return None

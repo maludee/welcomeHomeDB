@@ -6,7 +6,15 @@
             <input type = "submit">
 
         </form>
+        <!-- link to documentation for later -->
         <!-- https://python-adv-web-apps.readthedocs.io/en/latest/flask_db2.html -->
+        <style type="text/css">
+            table, th, td{
+                border: 1px solid black;
+            }
+
+        </style>
+        {% if data %}
         <table class="table">
 			<tr>
 				<th>itemID</th>
@@ -27,5 +35,6 @@
             </tr>
             {% endfor %}
         </table>
+        {% endif %}
     </body>
 </html>
