@@ -89,8 +89,7 @@ def create_auth_blueprint(login_manager: LoginManager):
                     )
                     db.commit()
                     cursor.execute(
-                        "INSERT INTO act (username, roleID) "
-                        "VALUES (%s, %s)",
+                        "INSERT INTO act (username, roleID) " "VALUES (%s, %s)",
                         (username, role),
                     )
                     db.commit()

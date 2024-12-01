@@ -8,6 +8,7 @@ from flask import Flask, render_template, request, session
 # from flask_mysqldb import MySQL
 from flask_login import LoginManager, login_required
 from dotenv import load_dotenv
+
 load_dotenv()
 
 
@@ -52,31 +53,31 @@ def create_app(test_config=None):
     @app.route("/hello")
     def hello():
         return "Hello, World!"
-    
+
     @app.route("/find_item")
     def find_item():
         return render_template("find_item.html")
-    
+
     @app.route("/find_item", methods=["POST"])
     def find_item_post():
         # user = session #TODO
-        item_id = request.form['item_id']
+        item_id = request.form["item_id"]
         database = db.get_db()
         cursor = database.cursor()
-        query = (f"""SELECT itemID, pieceNum, pDescription, roomNum, shelfNum, pNotes 
+        query = f"""SELECT itemID, pieceNum, pDescription, roomNum, shelfNum, pNotes 
                    FROM Piece 
-                   WHERE itemID = {item_id}""")
+                   WHERE itemID = {item_id}"""
         # cursor.execute(query, (user))
         cursor.execute(query)
         data = cursor.fetchall()
         cursor.close()
-        return render_template('find_item.html',data=data)
-    
+        return render_template("find_item.html", data=data)
+
     @app.route("/find_order", methods=("GET", "POST"))
     @login_required
     def find_order():
         return "Finding an order..."
-    
+
     @app.route("/accept_donation", methods=("GET", "POST"))
     @login_required
     def accept_donation():
