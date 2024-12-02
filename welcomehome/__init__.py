@@ -75,7 +75,7 @@ def create_app(test_config=None):
     @login_required
     def find_order():
         if request.method == "POST":
-            order_id = request.form['order_id']
+            order_id = request.form["order_id"]
             database = db.get_db()
             cursor = database.cursor()
             query = f"""SELECT orderID, 
@@ -102,8 +102,27 @@ def create_app(test_config=None):
     @app.route("/accept_donation", methods=("GET", "POST"))
     @login_required
     def accept_donation():
-        user = current_user.username
-
-        return "Accepting a donation..."
+        if request.method == "POST":
+            # assuming here that prompt user for donor_id means the donor's username
+            # since I didn't see a donor_id in the schema
+            donor_username = request.form["donor_username"]
+            database = db.get_db()
+            cursor = database.cursor()
+            query = f"""SELECT username, roleID
+                        FROM Person
+                        NATURAL JOIN Act
+                        WHERE username = '{donor_username}'
+                        AND roleID = 3
+                    """
+            cursor.execute(query)
+            data = cursor.fetchall()
+            cursor.close()
+            return render_template(
+                "donation/accept_donation.html",
+                data=data,
+                donor_username=donor_username,
+            )
+        else:
+            return render_template("donation/accept_donation.html")
 
     return app
