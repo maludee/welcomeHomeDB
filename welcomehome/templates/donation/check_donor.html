@@ -1,0 +1,18 @@
+<html>
+    <head>
+        {% include 'navbar.html' %}
+    </head>
+    <body>
+        <p>Enter the donor's username to begin registering a donation: </p>
+        <form action="/check_donor" method="POST">
+            <input type = "text" name="donor_username" required/></br>
+            <input type = "submit">
+        </form>
+    
+        {% if data == [] %}
+        <p>"{{ donor_username }}" is not a registered donor. Please check the username and try again, or register the user as a donor via <a href="{{ url_for('auth.register') }}">user registration</a>. </p>
+        {% endif %}
+
+    </body>
+</html>
+

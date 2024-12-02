@@ -3,7 +3,8 @@
 INSERT INTO Category (mainCategory, subCategory, catNotes)
 VALUES ('furniture', 'sofa', 'sofa furnitures'),
        ('furniture', 'lighting', 'stuff that lets you see'),
-       ("furniture", "chair", "things you sit on");
+       ("furniture", "chair", "things you sit on"),
+       ("artwork", "oil painting", "stuff to look at")
 
 INSERT INTO Item (iDescription, photo, color, isNew, hasPieces, material, mainCategory, subCategory)
 VALUES ('two-piece yellow sofa', NULL, 'yellow', TRUE, TRUE, 'silk', 'furniture', 'sofa'),

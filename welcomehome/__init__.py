@@ -99,9 +99,9 @@ def create_app(test_config=None):
         else:
             return render_template("find_order.html")
 
-    @app.route("/accept_donation", methods=("GET", "POST"))
+    @app.route("/check_donor", methods=("GET", "POST"))
     @login_required
-    def accept_donation():
+    def check_donor():
         if request.method == "POST":
             # assuming here that prompt user for donor_id means the donor's username
             # since I didn't see a donor_id in the schema
@@ -116,13 +116,44 @@ def create_app(test_config=None):
                     """
             cursor.execute(query)
             data = cursor.fetchall()
+            print("DATA", data)
             cursor.close()
-            return render_template(
+            if data == []:
+                return render_template("donation/check_donor.html", data=data, donor_username=donor_username)
+            else:
+                return render_template(
                 "donation/accept_donation.html",
                 data=data,
                 donor_username=donor_username,
-            )
+                )
         else:
-            return render_template("donation/accept_donation.html")
+            return render_template("donation/check_donor.html")
+        
+    @app.route("/accept_donation", methods=("GET", "POST"))
+    @login_required
+    def accept_donation():
+        if request.method == "POST":
+            iDescription = request.form["item_description"]
+            photo = request.form["photo"]
+            color = request.form["color"]
+            material = request.form["material"]
+            if request.form['number_of_pieces'] == '1':
+                hasPieces = "FALSE"
+            else: 
+                hasPieces = "TRUE"
+            mainCategory = request.form['mainCategory']
+            subCategory = request.form["subCategory"]
+            isNew = request.form["isNew"]
+            print(iDescription, photo, color, material, hasPieces, mainCategory, subCategory, isNew)
+            
+            database = db.get_db()
+            cursor = database.cursor()
+            
+            query = f"""INSERT INTO 
+                    """
+            cursor.close()
+        return render_template("donation/accept_donation.html")
 
     return app
+
+

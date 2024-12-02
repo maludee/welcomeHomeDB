@@ -3,22 +3,12 @@
         {% include 'navbar.html' %}
     </head>
     <body>
-        <p>Enter the donor's username to begin registering a donation: </p>
-        <form action="/accept_donation" method="POST">
-            <input type = "text" name="donor_username" required/></br>
-            <input type = "submit">
-        </form>
-    
-        {% if data == [] %}
-        <p>"{{ donor_username }}" is not a registered donor. Please check the username and try again, or register the user as a donor via <a href="{{ url_for('auth.register') }}">user registration</a>. </p>
-        {% endif %}
-
+      
         {% if data %}
-        <p>{{ donor_username }} is a registered donor. Please fill in the donation details below:</p>
+        <p>Registering an item donated by {{ donor_username }}. Please fill in the donation details below:</p>
 
         {% block content %}
         <form action="/accept_donation" method="post">
-            <input type="hidden" name="donor_username" value="{{ donor_username }}">
             <!-- TODO: max characters for item description? -->
             <label for="item_description">Item Description</label>
             <input name="item_description" id="item_description" required>
@@ -33,18 +23,50 @@
             <label for="material">Item Material</label>
             <input name="material" id="material" required></br>
 
-            <label for="mainCategory">Main Category</label>
-            <input name="mainCategory" id="mainCategory" required>
-
-            <label for="subCategory">Item Color</label>
-            <input name="subCategory" id="subCategory" required>
+            <!-- source: https://stackoverflow.com/questions/65908339/change-select-options-based-on-another-selected-option -->
+            <label for="inputGroupSelect01">Main Category</label>
+            <select class="form-select" id="mainCategory" onchange="javascript: dynamicdropdown(this.options[this.selectedIndex].value);" required>
+                <option value="furniture">Furniture</option>
+                <option value="artwork">Artwork</option>
+              </select>
+            </div>
+          </div>
+          <div  class="form-floating">
+            <label for="inputGroupSelect01">Sub Category</label>
+            <select id="genDropdown" class="form-select" id="SubCategory" required>
+            </select>
+            <script>
+              function doHTML(list){
+                let string ="";
+                let index = 0;
+                list.forEach(element => {
+                  string += `<option value="sub${index}">${element}</option>`;
+                  
+                });
+                return string;
+              }
+              function dynamicdropdown(mainCategory){
+                let subjects1 = ["sofa", "lighting", "chair"];
+                let subjects2 = ["oil painting"];
+                let genDropdown = document.getElementById("genDropdown");
+                if(mainCategory=="furniture"){
+                  genDropdown.innerHTML = doHTML(subjects1);
+                }
+                if(mainCategory=="artwork"){
+                  genDropdown.innerHTML = doHTML(subjects2);
+                }
+              }
+              window.onload = function () {
+                    dynamicdropdown("furniture");
+                };
+            </script>
 
             <!-- source https://medium.com/@muhebollah.diu/understanding-checkbox-behavior-in-html-forms-boolean-vs-string-values-8cc85d116980 -->
             <input type="hidden" name="isNew" value="FALSE">
             <input type="checkbox" name="isNew" value="TRUE"> New </br>
 
             <label for="number_of_pieces">Number of pieces:</label>
-            <select name="number_of_pieces">
+            <select name="number_of_pieces" required>
                 <option value="1">1</option>
                 <option value="2">2</option>
                 <option value="3">3</option>
@@ -71,6 +93,7 @@
         </form>
         {% endif %}
         </form>
+      
     </body>
 </html>
 
