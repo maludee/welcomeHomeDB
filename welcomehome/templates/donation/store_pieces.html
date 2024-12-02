@@ -1,0 +1,62 @@
+<html>
+    <head>
+        {% include 'navbar.html' %}
+        <style>
+            .form-item {
+                margin-bottom: 20px;
+            }
+            .form-item input, .form-item select {
+                margin-bottom: 10px;
+            }
+        </style>
+    </head>
+    <body>
+      
+        {% if donor_username %}
+        <p>Registering an item donated by {{ donor_username }}. Please fill in storage location information below:</p>
+        {% endif %}
+
+        <form action="/store_pieces" method="post">
+            <input type="hidden" name="itemID" value="{{ itemID }}" />
+            {% for i in range(1, number_of_pieces + 1) %}
+            <div class="form-row form-item">
+
+                <label for="pieceNum_{{ i }}">Piece Number</label>
+                <input type="text" name="pieceNum_{{ i }}" id="pieceNum_{{ i }}" value="{{ i }}" readonly size="2">
+               
+                <label for="pieceDescription">Piece Description</label>
+                <input name="pieceDescription" id="pieceDescription">
+
+                <label for="length">Length</label>
+                <input name="length" id="length"  type="number" required min="0" step="0.01" style="width: 50px;">
+
+                <label for="width">Width</label>
+                <input name="width" id="width"  type="number" required min="0" step="0.01" style="width: 50px;">
+
+                <label for="height">Height</label>
+                <input name="height" id="height" type="number" required min="0" step="0.01" style="width: 50px;">
+
+                <label for="roomNum">Room Number</label>
+                <select name="roomNum" id="roomNum" required>
+                {% for room in rooms %}
+                <option value="{{ room }}">{{ room }}</option>
+                {% endfor %}
+                </select>
+
+                <label for="shelfNum">Shelf Number</label>
+                <select name="shelfNum" id="shelfNum" required>
+                    {% for shelf in shelves %}
+                    <option value="{{ shelf }}">{{ shelf }}</option>
+                    {% endfor %}
+                    </select>
+
+                <label for="pNotes">Piece Notes</label>
+                <input name="pNotes" id="pNotes">
+            </div>
+            {% endfor %}
+
+            <input type="submit" value="Submit">
+        </form>
+
+    </body>
+</html>

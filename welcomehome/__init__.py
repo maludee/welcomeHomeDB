@@ -117,19 +117,22 @@ def create_app(test_config=None):
                     """
             cursor.execute(query)
             data = cursor.fetchall()
-            print("DATA", data)
             cursor.close()
             if data == []:
-                return render_template("donation/check_donor.html", data=data, donor_username=donor_username)
+                return render_template(
+                    "donation/check_donor.html",
+                    data=data,
+                    donor_username=donor_username,
+                )
             else:
                 return render_template(
-                "donation/accept_donation.html",
-                data=data,
-                donor_username=donor_username,
+                    "donation/accept_donation.html",
+                    data=data,
+                    donor_username=donor_username,
                 )
         else:
             return render_template("donation/check_donor.html")
-        
+
     @app.route("/accept_donation", methods=("GET", "POST"))
     @login_required
     def accept_donation():
@@ -139,38 +142,76 @@ def create_app(test_config=None):
             photo = request.form["photo"]
             color = request.form["color"]
             material = request.form["material"]
-            if request.form['number_of_pieces'] == '1':
+            if request.form["number_of_pieces"] == "1":
                 hasPieces = 0
-            else: 
+            else:
                 hasPieces = 1
-            mainCategory = request.form['mainCategory']
+            mainCategory = request.form["mainCategory"]
             subCategory = request.form["subCategory"]
-            if request.form["isNew"] == 'FALSE':
+            if request.form["isNew"] == "FALSE":
                 isNew = 0
             else:
                 isNew = 1
-            print(iDescription, photo, color, material, hasPieces, mainCategory, subCategory, isNew)
-            
+            print(iDescription, photo)
             database = db.get_db()
             cursor = database.cursor()
-            cursor.execute("INSERT INTO Item (iDescription, photo, color, isNew, hasPieces, material, mainCategory, subCategory) "
-                    "VALUES (%s, %s, %s, %s, %s, %s, %s, %s)",
-                    (iDescription, photo, color, isNew, hasPieces, material, mainCategory, subCategory),
-                    )
+            cursor.execute(
+                "INSERT INTO Item (iDescription, photo, color, isNew, hasPieces, material, mainCategory, subCategory) "
+                "VALUES (%s, %s, %s, %s, %s, %s, %s, %s)",
+                (
+                    iDescription,
+                    photo,
+                    color,
+                    isNew,
+                    hasPieces,
+                    material,
+                    mainCategory,
+                    subCategory,
+                ),
+            )
             database.commit()
-            # get the item id for the item we just insterted 
+            # get the item id for the item we just insterted
             cursor.execute(f"SELECT * FROM Item ORDER BY itemID DESC LIMIT 1")
             itemID = cursor.fetchone()
             itemID = itemID[0]
-            donateDate = datetime.date.today().strftime('%Y-%m-%d')
+            donateDate = datetime.date.today().strftime("%Y-%m-%d")
             # fill in donation info in donatedBy table
-            cursor.execute("INSERT INTO DonatedBy (ItemID, userName, donateDate)"
-                           "VALUES (%s, %s, %s)", 
-                           (itemID, donor_username, donateDate),)
+            cursor.execute(
+                "INSERT INTO DonatedBy (ItemID, userName, donateDate)"
+                "VALUES (%s, %s, %s)",
+                (itemID, donor_username, donateDate),
+            )
             database.commit()
+
+            # get the rooms and shelves from location, this will be for populating the html
+            cursor.execute("SELECT roomNum, shelfNum FROM Location") 
+            res = cursor.fetchall()
+            rooms = sorted([i[0] for i in res])
+            shelves = sorted([i[1] for i in res])
+            print(rooms, shelves)
             cursor.close()
-        return render_template("donation/accept_donation.html")
+            return render_template(
+                "donation/store_pieces.html",
+                donor_username=donor_username,
+                number_of_pieces=int(request.form["number_of_pieces"]),
+                rooms=rooms,
+                shelves=shelves,
+                itemID = itemID
+            )
+        else:
+            return render_template("donation/accept_donation.html")
+
+    @app.route("/store_pieces", methods=("GET", "POST"))
+    @login_required
+    def store_pieces():
+        if request.method == "POST":
+            itemID = request.form["itemID"]
+            
+
+
+
+       
+
+        return render_template("donation/store_pieces.html")
 
     return app
-
-
