@@ -1,4 +1,7 @@
 <html>
+    <head>
+        {% include 'navbar.html' %}
+    </head>
     <body>
         <p>Enter an item ID to locate an item: </p>
         <form action="/find_item" method="POST">
@@ -34,7 +37,11 @@
                 <td>{{item[5]}}</td>
             </tr>
             {% endfor %}
-        </table>
         {% endif %}
+        {% if data == [] %}
+        <p>No items found matching item_ID = {{ item_id }}.</p>
+        {% endif %}
+        </table>
+        
     </body>
 </html>

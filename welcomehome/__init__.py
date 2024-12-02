@@ -58,18 +58,16 @@ def create_app(test_config=None):
     @login_required
     def find_item():
         if request.method == "POST":
-        # user = current_user.username 
             item_id = request.form["item_id"]
             database = db.get_db()
             cursor = database.cursor()
             query = f"""SELECT itemID, pieceNum, pDescription, roomNum, shelfNum, pNotes 
                     FROM Piece 
                     WHERE itemID = {item_id}"""
-            # cursor.execute(query, (user))
             cursor.execute(query)
             data = cursor.fetchall()
             cursor.close()
-            return render_template("find_item.html", data=data)
+            return render_template("find_item.html", data=data, item_id=item_id)
         else:
             return render_template("find_item.html")
 
@@ -97,13 +95,15 @@ def create_app(test_config=None):
             cursor.execute(query)
             data = cursor.fetchall()
             cursor.close()
-            return render_template("find_order.html", data=data)
+            return render_template("find_order.html", data=data, order_id=order_id)
         else:
             return render_template("find_order.html")
 
     @app.route("/accept_donation", methods=("GET", "POST"))
     @login_required
     def accept_donation():
+        user = current_user.username
+
         return "Accepting a donation..."
 
     return app
