@@ -9,6 +9,7 @@
 
         {% block content %}
         <form action="/accept_donation" method="post">
+            <input type="hidden" name="donor_username" value="{{ donor_username }}" />
             <!-- TODO: max characters for item description? -->
             <label for="item_description">Item Description</label>
             <input name="item_description" id="item_description" required>
@@ -24,23 +25,23 @@
             <input name="material" id="material" required></br>
 
             <!-- source: https://stackoverflow.com/questions/65908339/change-select-options-based-on-another-selected-option -->
-            <label for="inputGroupSelect01">Main Category</label>
-            <select class="form-select" id="mainCategory" onchange="javascript: dynamicdropdown(this.options[this.selectedIndex].value);" required>
+            <label for="mainCategory">Main Category</label>
+            <select class="form-select" name= "mainCategory" id="mainCategory" onchange="javascript: dynamicdropdown(this.options[this.selectedIndex].value);" required>
                 <option value="furniture">Furniture</option>
                 <option value="artwork">Artwork</option>
               </select>
             </div>
           </div>
           <div  class="form-floating">
-            <label for="inputGroupSelect01">Sub Category</label>
-            <select id="genDropdown" class="form-select" id="SubCategory" required>
+            <label for="subCategory">Sub Category</label>
+            <select id="genDropdown" class="form-select" name="subCategory" id="SubCategory" required>
             </select>
             <script>
               function doHTML(list){
                 let string ="";
                 let index = 0;
                 list.forEach(element => {
-                  string += `<option value="sub${index}">${element}</option>`;
+                  string += `<option value="${element}">${element}</option>`;
                   
                 });
                 return string;

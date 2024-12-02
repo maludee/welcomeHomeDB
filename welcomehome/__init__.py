@@ -1,5 +1,6 @@
 import os
 import pymysql
+import datetime
 
 pymysql.install_as_MySQLdb()
 
@@ -133,24 +134,40 @@ def create_app(test_config=None):
     @login_required
     def accept_donation():
         if request.method == "POST":
+            donor_username = request.form["donor_username"]
             iDescription = request.form["item_description"]
             photo = request.form["photo"]
             color = request.form["color"]
             material = request.form["material"]
             if request.form['number_of_pieces'] == '1':
-                hasPieces = "FALSE"
+                hasPieces = 0
             else: 
-                hasPieces = "TRUE"
+                hasPieces = 1
             mainCategory = request.form['mainCategory']
             subCategory = request.form["subCategory"]
-            isNew = request.form["isNew"]
+            if request.form["isNew"] == 'FALSE':
+                isNew = 0
+            else:
+                isNew = 1
             print(iDescription, photo, color, material, hasPieces, mainCategory, subCategory, isNew)
             
             database = db.get_db()
             cursor = database.cursor()
-            
-            query = f"""INSERT INTO 
-                    """
+            cursor.execute("INSERT INTO Item (iDescription, photo, color, isNew, hasPieces, material, mainCategory, subCategory) "
+                    "VALUES (%s, %s, %s, %s, %s, %s, %s, %s)",
+                    (iDescription, photo, color, isNew, hasPieces, material, mainCategory, subCategory),
+                    )
+            database.commit()
+            # get the item id for the item we just insterted 
+            cursor.execute(f"SELECT * FROM Item ORDER BY itemID DESC LIMIT 1")
+            itemID = cursor.fetchone()
+            itemID = itemID[0]
+            donateDate = datetime.date.today().strftime('%Y-%m-%d')
+            # fill in donation info in donatedBy table
+            cursor.execute("INSERT INTO DonatedBy (ItemID, userName, donateDate)"
+                           "VALUES (%s, %s, %s)", 
+                           (itemID, donor_username, donateDate),)
+            database.commit()
             cursor.close()
         return render_template("donation/accept_donation.html")
 
