@@ -17,8 +17,9 @@ from flask_login import login_user, logout_user, current_user, login_required
 
 # Define your User class that extends UserMixin
 class User(UserMixin):
-    def __init__(self, username):
+    def __init__(self, username, role):
         self.username = username
+        self.role = role
 
     def get_id(self):
         return self.username
@@ -33,17 +34,24 @@ def create_auth_blueprint(login_manager: LoginManager):
     def load_user(username):
         db = get_db()
         cursor = db.cursor()
-        cursor.execute("SELECT * FROM Person WHERE username = %s", (username,))
+        cursor.execute(f"""SELECT *
+                          FROM Person 
+                          NATURAL JOIN Act
+                          NATURAL JOIN Role
+                          WHERE username = '{username}' 
+                          """) 
         columns = [column[0] for column in cursor.description]
         res = cursor.fetchone()
         if not res:
             return None
         res_dict = dict(zip(columns, res))
+        print(res_dict)
         if len(res_dict) == 0:
             return None
         else:
             username = res_dict.get("username")
-            return User(username)
+            role = res_dict.get("rDescription")
+            return User(username, role)
 
     @bp.route("/register", methods=("GET", "POST"))
     def register():
@@ -112,17 +120,22 @@ def create_auth_blueprint(login_manager: LoginManager):
             db = get_db()
             cursor = db.cursor()
             error = None
-            cursor.execute("SELECT * FROM Person WHERE username = %s", (username,))
+            cursor.execute(f"""SELECT * 
+                               FROM Person 
+                               NATURAL JOIN Act 
+                               NATURAL JOIN Role
+                               WHERE username = '{username}'""")
             columns = [column[0] for column in cursor.description]
             user = cursor.fetchone()
             if user is None:
                 error = "Non-existing username"
-            elif not check_password_hash(user[1], password):
+            elif not check_password_hash(user[2], password):
                 error = "Incorrect password."
             if error is None:
                 res_dict = dict(zip(columns, user))
                 username = res_dict.get("username")
-                wrapped_user = User(username)
+                role = res_dict.get("rDescription")
+                wrapped_user = User(username, role)
                 login_user(wrapped_user)
                 return redirect(url_for("auth.index"))  # change to your main page here
             flash(error)
