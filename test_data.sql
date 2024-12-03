@@ -34,18 +34,24 @@ INSERT INTO DonatedBy (ItemID, userName, donateDate)
 VALUES (1, 'testUser123', CURDATE());
 
 INSERT INTO Location (roomNum, shelfNum, shelf, shelfDescription)
-VALUES (5, 0, NULL, "test shelf"),
-       (2, 1, NULL, "lamps shelf"),
-       (10, 230, NULL, "chairs shelf");
+VALUES (5, 0, NULL, "test shelf "),
+       (5, 1, NULL, "test shelf 2"),
+       (5, 2, NULL, "test shelf 3"), 
+       (2, 0, NULL, "little lamps shelf"),
+       (2, 1, NULL, "medium lamps shelf"),
+       (2, 2, NULL, "big lamps shelf"),
+       (10, 0, NULL, "small chairs shelf"),
+       (10, 1, NULL, "medium chairs shelf"),
+       (10, 2, NULL, "big chairs shelf");
 
 INSERT INTO Piece (ItemID, pieceNum, pDescription, length, width, height, roomNum, shelfNum, pNotes)
 VALUES (1, 1, 'sofa body', 30, 20, 20, 5, 0, 'Stored in Room 5, no designated shelf'),
        (1, 2, 'cushion', 5, 5, 5, 5, 0, 'Stored in Room 5, no designated shelf'),
        (2, 1, 'lamp', 0.5, 0.4, 2, 2, 1, 'Only one piece'),
-       (3, 1, "green dining chair", 24.2, 26, 26, 10, 230,  "one of four"),
-       (3, 2, "green dining chair", 24.2, 26, 26, 10, 230,  "one of four"),
-       (3, 3, "green dining chair", 24.2, 26, 26, 10, 230,  "one of four"),
-       (3, 4,  "green dining chair", 24.2, 26, 26, 10, 230, "one of four - has a small scratch");
+       (3, 1, "green dining chair", 24.2, 26, 26, 10, 1,  "one of four"),
+       (3, 2, "green dining chair", 24.2, 26, 26, 10, 1,  "one of four"),
+       (3, 3, "green dining chair", 24.2, 26, 26, 10, 2,  "one of four"),
+       (3, 4,  "green dining chair", 24.2, 26, 26, 10, 2, "one of four - has a small scratch");
 
 INSERT INTO Ordered (orderID, orderDate, orderNotes, supervisor, client)
 VALUES (12345, '2024-01-01', "no notes", "bobsmith", "janedoe"),
@@ -56,6 +62,8 @@ VALUES (3, 12345, FALSE),
        (1, 11111, TRUE),
        (2, 11111, TRUE);
 
+INSERT INTO Delivered  (userName, orderID, status, date) 
+VALUES ("yourname", 11111, "Delivered", "2023-12-23");
 
 
 

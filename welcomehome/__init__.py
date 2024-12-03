@@ -148,10 +148,10 @@ def create_app(test_config=None):
                 hasPieces = 1
             mainCategory = request.form["mainCategory"]
             subCategory = request.form["subCategory"]
-            if request.form["isNew"] == "FALSE":
+            if "isNew" in request.form:
+                isNew = 1 
+            else: 
                 isNew = 0
-            else:
-                isNew = 1
             print(iDescription, photo)
             database = db.get_db()
             cursor = database.cursor()
@@ -186,8 +186,8 @@ def create_app(test_config=None):
             # get the rooms and shelves from location, this will be for populating the html
             cursor.execute("SELECT roomNum, shelfNum FROM Location") 
             res = cursor.fetchall()
-            rooms = sorted([i[0] for i in res])
-            shelves = sorted([i[1] for i in res])
+            rooms = sorted(list(set([i[0] for i in res])))
+            shelves = sorted(list(set([i[1] for i in res])))
             print(rooms, shelves)
             cursor.close()
             return render_template(
@@ -196,7 +196,7 @@ def create_app(test_config=None):
                 number_of_pieces=int(request.form["number_of_pieces"]),
                 rooms=rooms,
                 shelves=shelves,
-                itemID = itemID
+                itemID=itemID
             )
         else:
             return render_template("donation/accept_donation.html")
@@ -221,7 +221,7 @@ def create_app(test_config=None):
                 shelfNum = request.form[f'shelfNum_{i}']
                 pNotes = request.form[f'pNotes_{i}']
 
-            cursor.execute(
+                cursor.execute(
                 "INSERT INTO Piece (ItemID, pieceNum, pDescription, length, width, height, roomNum, shelfNum, pNotes)" 
                 "VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s)",
                 (
@@ -236,10 +236,96 @@ def create_app(test_config=None):
                 pNotes
                 ),
             )
-            database.commit()
+                database.commit()
 
-        cursor.close()
-        return "All done" 
+            cursor.close()
+        return render_template("donation/donation_complete.html")
+    
+    @app.route("/user_tasks", methods=('GET', 'POST'))
+    @login_required
+    def user_tasks():
+        role = current_user.role
+        username = current_user.username
+        database = db.get_db()
+        cursor = database.cursor()
+
+        # set these three to None in case they are not used below
+        staff_data = None
+        volunteer_data = None
+        client_data = None
+
+        if role == "staff":
+            cursor.execute(f"""WITH itemsInOrders as (
+                                SELECT i.orderID, count(distinct(i.itemID)) as numItems
+                                FROM ItemIn i
+                                GROUP BY 1)
+    
+                            SELECT 
+                                o.orderID, 
+                                o.orderDate, 
+                                o.supervisor, 
+                                o.client, 
+                                o.orderNotes, 
+                                numItems,
+                                case when d.status is NULL then "not delivered" else status end as status, 
+                                case when d.username is NULL then "unassigned" else d.username end as deliveryPerson
+                            FROM `Ordered` o
+                            LEFT JOIN Delivered d on o.orderID = d.orderID
+                            INNER JOIN itemsInOrders i on i.orderID = o.orderID
+                            WHERE supervisor = '{username}' or d.username = '{username}'
+            """)
+            columns = [column[0] for column in cursor.description]
+            staff_data=cursor.fetchall()
+            cursor.close()
+
+        elif role == "volunteer":
+            cursor.execute(f"""WITH itemsInOrders as (
+                                SELECT i.orderID, count(distinct(i.itemID)) as numItems
+                                FROM ItemIn i
+                                GROUP BY 1)
+    
+                            SELECT 
+                                o.orderID, 
+                                o.orderDate, 
+                                o.supervisor, 
+                                o.client, 
+                                o.orderNotes, 
+                                numItems,
+                                case when d.status is NULL then "not delivered" else status end as status, 
+                                case when d.username is NULL then "unassigned" else d.username end as deliveryPerson
+                            FROM `Ordered` o
+                            LEFT JOIN Delivered d on o.orderID = d.orderID
+                            INNER JOIN itemsInOrders i on i.orderID = o.orderID
+                            WHERE d.username = '{username}'
+            """)
+            columns = [column[0] for column in cursor.description]
+            volunteer_data=cursor.fetchall()
+            cursor.close()
+        elif role == "client":
+            cursor.execute(f"""WITH itemsInOrders as (
+                                SELECT i.orderID, count(distinct(i.itemID)) as numItems
+                                FROM ItemIn i
+                                GROUP BY 1)
+    
+                            SELECT 
+                                o.orderID, 
+                                o.orderDate, 
+                                numItems,
+                                case when d.status is NULL then "not delivered" else status end as status
+                            FROM `Ordered` o
+                            LEFT JOIN Delivered d on o.orderID = d.orderID
+                            INNER JOIN itemsInOrders i on i.orderID = o.orderID
+                            WHERE client = '{username}' 
+            """)
+            columns = [column[0] for column in cursor.description]
+            client_data=cursor.fetchall()
+            cursor.close()
+
+        return render_template('user_tasks.html', 
+                               columns=columns, 
+                               staff_data=staff_data,
+                               volunteer_data=volunteer_data,
+                               client_data=client_data)
    
 
     return app
