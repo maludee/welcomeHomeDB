@@ -34,14 +34,13 @@ def create_auth_blueprint(login_manager: LoginManager):
     def load_user(username):
         db = get_db()
         cursor = db.cursor()
-        cursor.execute(
-            f"""SELECT *
-                          FROM Person 
-                          NATURAL JOIN Act
-                          NATURAL JOIN Role
-                          WHERE username = '{username}' 
-                          """
-        )
+        query = """SELECT *
+                FROM Person 
+                NATURAL JOIN Act
+                NATURAL JOIN Role
+                WHERE username = %s
+                """
+        cursor.execute(query, (username))
         columns = [column[0] for column in cursor.description]
         res = cursor.fetchone()
         if not res:
@@ -122,13 +121,12 @@ def create_auth_blueprint(login_manager: LoginManager):
             db = get_db()
             cursor = db.cursor()
             error = None
-            cursor.execute(
-                f"""SELECT * 
+            query = """SELECT * 
                                FROM Person 
                                NATURAL JOIN Act 
                                NATURAL JOIN Role
-                               WHERE username = '{username}'"""
-            )
+                               WHERE username = %s"""
+            cursor.execute(query, (username))
             columns = [column[0] for column in cursor.description]
             user = cursor.fetchone()
             if user is None:

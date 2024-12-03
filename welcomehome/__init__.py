@@ -55,6 +55,7 @@ def create_app(test_config=None):
     def hello():
         return "Hello, World!"
 
+    # guide to SQL injection: https://bobby-tables.com/python.html
     @app.route("/find_item", methods=("GET", "POST"))
     @login_required
     def find_item():
@@ -62,7 +63,7 @@ def create_app(test_config=None):
             item_id = request.form["item_id"]
             database = db.get_db()
             cursor = database.cursor()
-            query = f"""SELECT 
+            query = """SELECT 
                             itemID, 
                             pieceNum, 
                             pDescription, 
@@ -70,8 +71,8 @@ def create_app(test_config=None):
                             shelfNum, 
                             pNotes 
                     FROM Piece 
-                    WHERE itemID = {item_id}"""
-            cursor.execute(query)
+                    WHERE itemID = %s"""
+            cursor.execute(query, (item_id),)
             data = cursor.fetchall()
             cursor.close()
             return render_template("find_item.html", data=data, item_id=item_id)
@@ -85,7 +86,7 @@ def create_app(test_config=None):
             order_id = request.form["order_id"]
             database = db.get_db()
             cursor = database.cursor()
-            query = f"""SELECT orderID, 
+            query = """SELECT orderID, 
                                itemID,
                                pieceNum, 
                                pDescription, 
@@ -98,8 +99,8 @@ def create_app(test_config=None):
                         NATURAL JOIN Item
                         NATURAL JOIN location
                         NATURAL JOIN ItemIn
-                        WHERE orderID = {order_id}"""
-            cursor.execute(query)
+                        WHERE orderID = %s"""
+            cursor.execute(query, (order_id),)
             data = cursor.fetchall()
             cursor.close()
             return render_template("find_order.html", data=data, order_id=order_id)
@@ -115,13 +116,13 @@ def create_app(test_config=None):
             donor_username = request.form["donor_username"]
             database = db.get_db()
             cursor = database.cursor()
-            query = f"""SELECT username, roleID
+            query = """SELECT username, roleID
                         FROM Person
                         NATURAL JOIN Act
-                        WHERE username = '{donor_username}'
+                        WHERE username = %s
                         AND roleID = 3
                     """
-            cursor.execute(query)
+            cursor.execute(query, (donor_username),)
             data = cursor.fetchall()
             cursor.close()
             if data == []:
@@ -261,8 +262,7 @@ def create_app(test_config=None):
         client_data = None
 
         if role == "staff":
-            cursor.execute(
-                f"""WITH itemsInOrders as (
+            query = """WITH itemsInOrders as (
                                 SELECT i.orderID, count(distinct(i.itemID)) as numItems
                                 FROM ItemIn i
                                 GROUP BY 1)
@@ -279,16 +279,15 @@ def create_app(test_config=None):
                             FROM `Ordered` o
                             LEFT JOIN Delivered d on o.orderID = d.orderID
                             INNER JOIN itemsInOrders i on i.orderID = o.orderID
-                            WHERE supervisor = '{username}' or d.username = '{username}'
+                            WHERE supervisor = %s or d.username = %s
             """
-            )
+            cursor.execute(query, (username, username),)
             columns = [column[0] for column in cursor.description]
             staff_data = cursor.fetchall()
             cursor.close()
 
         elif role == "volunteer":
-            cursor.execute(
-                f"""WITH itemsInOrders as (
+            query = """WITH itemsInOrders as (
                                 SELECT i.orderID, count(distinct(i.itemID)) as numItems
                                 FROM ItemIn i
                                 GROUP BY 1)
@@ -305,15 +304,14 @@ def create_app(test_config=None):
                             FROM `Ordered` o
                             LEFT JOIN Delivered d on o.orderID = d.orderID
                             INNER JOIN itemsInOrders i on i.orderID = o.orderID
-                            WHERE d.username = '{username}'
+                            WHERE d.username = %s
             """
-            )
+            cursor.execute(query, (username),)
             columns = [column[0] for column in cursor.description]
             volunteer_data = cursor.fetchall()
             cursor.close()
         elif role == "client":
-            cursor.execute(
-                f"""WITH itemsInOrders as (
+            query = """WITH itemsInOrders as (
                                 SELECT i.orderID, count(distinct(i.itemID)) as numItems
                                 FROM ItemIn i
                                 GROUP BY 1)
@@ -326,9 +324,9 @@ def create_app(test_config=None):
                             FROM `Ordered` o
                             LEFT JOIN Delivered d on o.orderID = d.orderID
                             INNER JOIN itemsInOrders i on i.orderID = o.orderID
-                            WHERE client = '{username}' 
+                            WHERE client = %s
             """
-            )
+            cursor.execute(query, (username))
             columns = [column[0] for column in cursor.description]
             client_data = cursor.fetchall()
             cursor.close()
@@ -360,14 +358,13 @@ def create_app(test_config=None):
         start_date = request.args.get("start_date", default_start_date)
         end_date = request.args.get("end_date", default_end_date)
 
-        cursor.execute(
-            f"""with catsOrdered AS (
+        query = """with catsOrdered AS (
                             select distinct orderID, itemID, mainCategory, subCategory
                             from Category
                             NATURAL JOIN Item
                             NATURAL JOIN ItemIn
                             NATURAL JOIN Ordered
-                            WHERE orderDate BETWEEN '{start_date}' AND '{end_date}'
+                            WHERE orderDate BETWEEN %s AND %s
                                             ),
 
                         catCounts AS (
@@ -381,7 +378,7 @@ def create_app(test_config=None):
                         where num_ordered = (SELECT MAX(num_ordered) from catCounts)
                         
                         """
-        )
+        cursor.execute(query, (start_date, end_date))
         ranked_cats = cursor.fetchall()
         print(ranked_cats)
         cursor.close()
