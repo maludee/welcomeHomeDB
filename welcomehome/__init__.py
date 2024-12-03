@@ -62,7 +62,13 @@ def create_app(test_config=None):
             item_id = request.form["item_id"]
             database = db.get_db()
             cursor = database.cursor()
-            query = f"""SELECT itemID, pieceNum, pDescription, roomNum, shelfNum, pNotes 
+            query = f"""SELECT 
+                            itemID, 
+                            pieceNum, 
+                            pDescription, 
+                            roomNum, 
+                            shelfNum, 
+                            pNotes 
                     FROM Piece 
                     WHERE itemID = {item_id}"""
             cursor.execute(query)
@@ -351,8 +357,8 @@ def create_app(test_config=None):
         print(default_start_date)
         print(default_end_date)
 
-        start_date = request.args.get('start_date', default_start_date)
-        end_date = request.args.get('end_date', default_end_date)
+        start_date = request.args.get("start_date", default_start_date)
+        end_date = request.args.get("end_date", default_end_date)
 
         cursor.execute(
             f"""with catsOrdered AS (
@@ -380,9 +386,11 @@ def create_app(test_config=None):
         print(ranked_cats)
         cursor.close()
 
-        return render_template("item_stats.html", 
-                               ranked_cats=ranked_cats, 
-                               start_date=start_date, 
-                               end_date=end_date)
+        return render_template(
+            "item_stats.html",
+            ranked_cats=ranked_cats,
+            start_date=start_date,
+            end_date=end_date,
+        )
 
     return app
