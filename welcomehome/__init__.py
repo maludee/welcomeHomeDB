@@ -72,7 +72,7 @@ def create_app(test_config=None):
                             pNotes 
                     FROM Piece 
                     WHERE itemID = %s"""
-            cursor.execute(query, (item_id),)
+            cursor.execute(query, (item_id,))
             data = cursor.fetchall()
             cursor.close()
             return render_template("find_item.html", data=data, item_id=item_id)
@@ -100,7 +100,7 @@ def create_app(test_config=None):
                         NATURAL JOIN location
                         NATURAL JOIN ItemIn
                         WHERE orderID = %s"""
-            cursor.execute(query, (order_id),)
+            cursor.execute(query, (order_id,))
             data = cursor.fetchall()
             cursor.close()
             return render_template("find_order.html", data=data, order_id=order_id)
@@ -122,7 +122,7 @@ def create_app(test_config=None):
                         WHERE username = %s
                         AND roleID = 3
                     """
-            cursor.execute(query, (donor_username),)
+            cursor.execute(query, (donor_username,))
             data = cursor.fetchall()
             cursor.close()
             if data == []:
@@ -281,7 +281,7 @@ def create_app(test_config=None):
                             INNER JOIN itemsInOrders i on i.orderID = o.orderID
                             WHERE supervisor = %s or d.username = %s
             """
-            cursor.execute(query, (username, username),)
+            cursor.execute(query, (username, username))
             columns = [column[0] for column in cursor.description]
             staff_data = cursor.fetchall()
             cursor.close()
@@ -306,7 +306,7 @@ def create_app(test_config=None):
                             INNER JOIN itemsInOrders i on i.orderID = o.orderID
                             WHERE d.username = %s
             """
-            cursor.execute(query, (username),)
+            cursor.execute(query, (username,))
             columns = [column[0] for column in cursor.description]
             volunteer_data = cursor.fetchall()
             cursor.close()
@@ -326,7 +326,7 @@ def create_app(test_config=None):
                             INNER JOIN itemsInOrders i on i.orderID = o.orderID
                             WHERE client = %s
             """
-            cursor.execute(query, (username))
+            cursor.execute(query, (username,))
             columns = [column[0] for column in cursor.description]
             client_data = cursor.fetchall()
             cursor.close()

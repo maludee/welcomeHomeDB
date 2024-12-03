@@ -40,7 +40,7 @@ def create_auth_blueprint(login_manager: LoginManager):
                 NATURAL JOIN Role
                 WHERE username = %s
                 """
-        cursor.execute(query, (username))
+        cursor.execute(query, (username,))
         columns = [column[0] for column in cursor.description]
         res = cursor.fetchone()
         if not res:
@@ -126,7 +126,7 @@ def create_auth_blueprint(login_manager: LoginManager):
                                NATURAL JOIN Act 
                                NATURAL JOIN Role
                                WHERE username = %s"""
-            cursor.execute(query, (username))
+            cursor.execute(query, (username,))
             columns = [column[0] for column in cursor.description]
             user = cursor.fetchone()
             if user is None:
