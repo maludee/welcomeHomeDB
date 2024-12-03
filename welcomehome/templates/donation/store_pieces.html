@@ -18,40 +18,42 @@
 
         <form action="/store_pieces" method="post">
             <input type="hidden" name="itemID" value="{{ itemID }}" />
+            <input type="hidden" name="number_of_pieces" value="{{ number_of_pieces }}" />
+
             {% for i in range(1, number_of_pieces + 1) %}
             <div class="form-row form-item">
 
                 <label for="pieceNum_{{ i }}">Piece Number</label>
                 <input type="text" name="pieceNum_{{ i }}" id="pieceNum_{{ i }}" value="{{ i }}" readonly size="2">
                
-                <label for="pieceDescription">Piece Description</label>
-                <input name="pieceDescription" id="pieceDescription">
+                <label for="pDescription">Piece Description</label>
+                <input name="pDescription_{{ i }}" id="pDescription">
 
                 <label for="length">Length</label>
-                <input name="length" id="length"  type="number" required min="0" step="0.01" style="width: 50px;">
+                <input name="length_{{ i }}" id="length"  type="number" required min="0" step="0.01" style="width: 50px;">
 
                 <label for="width">Width</label>
-                <input name="width" id="width"  type="number" required min="0" step="0.01" style="width: 50px;">
+                <input name="width_{{ i }}" id="width"  type="number" required min="0" step="0.01" style="width: 50px;">
 
                 <label for="height">Height</label>
-                <input name="height" id="height" type="number" required min="0" step="0.01" style="width: 50px;">
+                <input name="height_{{ i }}" id="height" type="number" required min="0" step="0.01" style="width: 50px;">
 
                 <label for="roomNum">Room Number</label>
-                <select name="roomNum" id="roomNum" required>
+                <select name="roomNum_{{ i }}" id="roomNum" required>
                 {% for room in rooms %}
                 <option value="{{ room }}">{{ room }}</option>
                 {% endfor %}
                 </select>
 
                 <label for="shelfNum">Shelf Number</label>
-                <select name="shelfNum" id="shelfNum" required>
+                <select name="shelfNum_{{ i }}" id="shelfNum" required>
                     {% for shelf in shelves %}
                     <option value="{{ shelf }}">{{ shelf }}</option>
                     {% endfor %}
                     </select>
 
                 <label for="pNotes">Piece Notes</label>
-                <input name="pNotes" id="pNotes">
+                <input name="pNotes_{{ i }}" id="pNotes">
             </div>
             {% endfor %}
 

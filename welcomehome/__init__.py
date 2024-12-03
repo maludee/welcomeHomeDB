@@ -206,12 +206,40 @@ def create_app(test_config=None):
     def store_pieces():
         if request.method == "POST":
             itemID = request.form["itemID"]
-            
+            number_of_pieces = int(request.form['number_of_pieces'])
+            database = db.get_db()
+            cursor = database.cursor()
 
+            # this should let me collect all of the piece information and send to db 
+            for i in range(1, number_of_pieces + 1):
+                pieceNum = request.form[f'pieceNum_{i}']
+                pDescription = request.form[f'pDescription_{i}']
+                length = request.form[f'length_{i}']
+                width = request.form[f'width_{i}']
+                height = request.form[f'height_{i}']
+                roomNum = request.form[f'roomNum_{i}']
+                shelfNum = request.form[f'shelfNum_{i}']
+                pNotes = request.form[f'pNotes_{i}']
 
+            cursor.execute(
+                "INSERT INTO Piece (ItemID, pieceNum, pDescription, length, width, height, roomNum, shelfNum, pNotes)" 
+                "VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s)",
+                (
+                itemID,
+                pieceNum,
+                pDescription,
+                length,
+                width,
+                height,
+                roomNum,
+                shelfNum,
+                pNotes
+                ),
+            )
+            database.commit()
 
-       
-
-        return render_template("donation/store_pieces.html")
+        cursor.close()
+        return "All done" 
+   
 
     return app
