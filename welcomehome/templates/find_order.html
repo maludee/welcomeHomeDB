@@ -1,6 +1,12 @@
 <html>
     <head>
         {% include 'navbar.html' %}
+        <style type="text/css">
+            table, th, td{
+                border: 1px solid black;
+            }
+
+        </style>
     </head>
     <body>
         <p>Enter an order ID to locate an order: </p>
@@ -10,12 +16,7 @@
 
         </form>
 
-        <style type="text/css">
-            table, th, td{
-                border: 1px solid black;
-            }
-
-        </style>
+      
         {% if data %}
         <table class="table">
 			<tr>

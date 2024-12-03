@@ -149,8 +149,8 @@ def create_app(test_config=None):
             mainCategory = request.form["mainCategory"]
             subCategory = request.form["subCategory"]
             if "isNew" in request.form:
-                isNew = 1 
-            else: 
+                isNew = 1
+            else:
                 isNew = 0
             print(iDescription, photo)
             database = db.get_db()
@@ -184,7 +184,7 @@ def create_app(test_config=None):
             database.commit()
 
             # get the rooms and shelves from location, this will be for populating the html
-            cursor.execute("SELECT roomNum, shelfNum FROM Location") 
+            cursor.execute("SELECT roomNum, shelfNum FROM Location")
             res = cursor.fetchall()
             rooms = sorted(list(set([i[0] for i in res])))
             shelves = sorted(list(set([i[1] for i in res])))
@@ -196,7 +196,7 @@ def create_app(test_config=None):
                 number_of_pieces=int(request.form["number_of_pieces"]),
                 rooms=rooms,
                 shelves=shelves,
-                itemID=itemID
+                itemID=itemID,
             )
         else:
             return render_template("donation/accept_donation.html")
@@ -206,42 +206,42 @@ def create_app(test_config=None):
     def store_pieces():
         if request.method == "POST":
             itemID = request.form["itemID"]
-            number_of_pieces = int(request.form['number_of_pieces'])
+            number_of_pieces = int(request.form["number_of_pieces"])
             database = db.get_db()
             cursor = database.cursor()
 
-            # this should let me collect all of the piece information and send to db 
+            # this should let me collect all of the piece information and send to db
             for i in range(1, number_of_pieces + 1):
-                pieceNum = request.form[f'pieceNum_{i}']
-                pDescription = request.form[f'pDescription_{i}']
-                length = request.form[f'length_{i}']
-                width = request.form[f'width_{i}']
-                height = request.form[f'height_{i}']
-                roomNum = request.form[f'roomNum_{i}']
-                shelfNum = request.form[f'shelfNum_{i}']
-                pNotes = request.form[f'pNotes_{i}']
+                pieceNum = request.form[f"pieceNum_{i}"]
+                pDescription = request.form[f"pDescription_{i}"]
+                length = request.form[f"length_{i}"]
+                width = request.form[f"width_{i}"]
+                height = request.form[f"height_{i}"]
+                roomNum = request.form[f"roomNum_{i}"]
+                shelfNum = request.form[f"shelfNum_{i}"]
+                pNotes = request.form[f"pNotes_{i}"]
 
                 cursor.execute(
-                "INSERT INTO Piece (ItemID, pieceNum, pDescription, length, width, height, roomNum, shelfNum, pNotes)" 
-                "VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s)",
-                (
-                itemID,
-                pieceNum,
-                pDescription,
-                length,
-                width,
-                height,
-                roomNum,
-                shelfNum,
-                pNotes
-                ),
-            )
+                    "INSERT INTO Piece (ItemID, pieceNum, pDescription, length, width, height, roomNum, shelfNum, pNotes)"
+                    "VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s)",
+                    (
+                        itemID,
+                        pieceNum,
+                        pDescription,
+                        length,
+                        width,
+                        height,
+                        roomNum,
+                        shelfNum,
+                        pNotes,
+                    ),
+                )
                 database.commit()
 
             cursor.close()
         return render_template("donation/donation_complete.html")
-    
-    @app.route("/user_tasks", methods=('GET', 'POST'))
+
+    @app.route("/user_tasks", methods=("GET", "POST"))
     @login_required
     def user_tasks():
         role = current_user.role
@@ -255,7 +255,8 @@ def create_app(test_config=None):
         client_data = None
 
         if role == "staff":
-            cursor.execute(f"""WITH itemsInOrders as (
+            cursor.execute(
+                f"""WITH itemsInOrders as (
                                 SELECT i.orderID, count(distinct(i.itemID)) as numItems
                                 FROM ItemIn i
                                 GROUP BY 1)
@@ -273,13 +274,15 @@ def create_app(test_config=None):
                             LEFT JOIN Delivered d on o.orderID = d.orderID
                             INNER JOIN itemsInOrders i on i.orderID = o.orderID
                             WHERE supervisor = '{username}' or d.username = '{username}'
-            """)
+            """
+            )
             columns = [column[0] for column in cursor.description]
-            staff_data=cursor.fetchall()
+            staff_data = cursor.fetchall()
             cursor.close()
 
         elif role == "volunteer":
-            cursor.execute(f"""WITH itemsInOrders as (
+            cursor.execute(
+                f"""WITH itemsInOrders as (
                                 SELECT i.orderID, count(distinct(i.itemID)) as numItems
                                 FROM ItemIn i
                                 GROUP BY 1)
@@ -297,12 +300,14 @@ def create_app(test_config=None):
                             LEFT JOIN Delivered d on o.orderID = d.orderID
                             INNER JOIN itemsInOrders i on i.orderID = o.orderID
                             WHERE d.username = '{username}'
-            """)
+            """
+            )
             columns = [column[0] for column in cursor.description]
-            volunteer_data=cursor.fetchall()
+            volunteer_data = cursor.fetchall()
             cursor.close()
         elif role == "client":
-            cursor.execute(f"""WITH itemsInOrders as (
+            cursor.execute(
+                f"""WITH itemsInOrders as (
                                 SELECT i.orderID, count(distinct(i.itemID)) as numItems
                                 FROM ItemIn i
                                 GROUP BY 1)
@@ -316,16 +321,62 @@ def create_app(test_config=None):
                             LEFT JOIN Delivered d on o.orderID = d.orderID
                             INNER JOIN itemsInOrders i on i.orderID = o.orderID
                             WHERE client = '{username}' 
-            """)
+            """
+            )
             columns = [column[0] for column in cursor.description]
-            client_data=cursor.fetchall()
+            client_data = cursor.fetchall()
             cursor.close()
 
-        return render_template('user_tasks.html', 
-                               columns=columns, 
-                               staff_data=staff_data,
-                               volunteer_data=volunteer_data,
-                               client_data=client_data)
-   
+        return render_template(
+            "user_tasks.html",
+            columns=columns,
+            staff_data=staff_data,
+            volunteer_data=volunteer_data,
+            client_data=client_data,
+        )
+
+    @app.route("/item_stats", methods=["GET"])
+    @login_required
+    def item_stats():
+
+        database = db.get_db()
+        cursor = database.cursor()
+        cursor.execute(
+            "SELECT min(orderdate) as start_date, max(orderdate) as end_date FROM ordered"
+        )
+        start_end_date = cursor.fetchall()
+        print(start_end_date)
+        default_start_date = (start_end_date[0][0]).strftime("%Y-%m-%d")
+        default_end_date = (start_end_date[0][1]).strftime("%Y-%m-%d")
+        print(default_start_date)
+        print(default_end_date)
+
+        start_date = request.args.get('start_date', default_start_date)
+        end_date = request.args.get('end_date', default_end_date)
+
+        cursor.execute(
+            f"""with catsOrdered AS (
+                            select distinct orderID, itemID, mainCategory, subCategory
+                            from Category
+                            NATURAL JOIN Item
+                            NATURAL JOIN ItemIn
+                            NATURAL JOIN Ordered
+                            WHERE orderDate BETWEEN '{start_date}' AND '{end_date}'
+                                            )
+
+                        select mainCategory, subCategory, count(*) as num_ordered
+                        from catsOrdered
+                        group by 1,2 
+                        order by num_ordered DESC limit 5
+                        """
+        )
+        ranked_cats = cursor.fetchall()
+        print(ranked_cats)
+        cursor.close()
+
+        return render_template("item_stats.html", 
+                               ranked_cats=ranked_cats, 
+                               start_date=start_date, 
+                               end_date=end_date)
 
     return app

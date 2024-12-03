@@ -1,0 +1,47 @@
+<html>
+    <head>
+        {% include 'navbar.html' %}
+        <!-- TODO: add some padding to the navbar -->
+        <style type="text/css">
+            table, th, td{
+                border: 1px solid black;
+            }
+        </style>
+    </head>
+    <body>
+        <form method="GET" action="/item_stats">
+            <label for="start_date">Start Date:</label>
+            <input type="date" id="start_date" name="start_date" value="{{ start_date }}">
+            <label for="end_date">End Date:</label>
+            <input type="date" id="end_date" name="end_date" value="{{ end_date }}">
+            <button type="submit">Filter</button>
+        </form>
+
+        {% if ranked_cats %}
+        <p>The main category and sub category with the most orders between {{ start_date }} and {{ end_date }} is:</p>
+      
+
+        <table>
+            <thead>
+                <tr>
+                    <th>mainCategory</th>
+                    <th>subCategory</th>
+                    <th>orderCount</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for item in ranked_cats %}
+            <tr>
+                <td>{{item[0]}}</td>
+                <td>{{item[1]}}</td>
+                <td>{{item[2]}}</td>
+            </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+        {% endif %}
+        {% if not ranked_cats %}
+        <p>There were no orders between {{ start_date }} and {{ end_date }}. Please check your dates and try again.</p>
+        {% endif %}
+    </body>
+</html>
