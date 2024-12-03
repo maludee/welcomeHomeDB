@@ -12,10 +12,10 @@ VALUES ('two-piece yellow sofa', NULL, 'yellow', TRUE, TRUE, 'silk', 'furniture'
        ("green dining set", NULL, "green", TRUE, TRUE, "wood", "furniture", "chair");
 
 INSERT INTO Person (userName, password, fname, lname, email)
-VALUES ('testUser123', 'passwd', 'test', 'User', 'testUser123@example.com'),
-       ('janedoe', 'passwd', 'jane', 'doe', 'jd@nyu.edu'),
-       ('bobsmith', 'passwd', 'bob', 'smith', 'bs@nyu.edu'),
-       ('yourname', 'passwd', 'your', 'name', 'yn@nyu.edu');
+VALUES ('testUser123', 'scrypt:32768:8:1$iS4cLds4Rv7bBDKT$95c1102c6457edb3d5bfde595e7ce90740563b924d9fccd0dc31f87b57d48cefd35c283a43d331c575d18345ab104e69027acc4159be99ecab5b39ed133f50e4', 'test', 'User', 'testUser123@example.com'),
+       ('janedoe', 'scrypt:32768:8:1$iS4cLds4Rv7bBDKT$95c1102c6457edb3d5bfde595e7ce90740563b924d9fccd0dc31f87b57d48cefd35c283a43d331c575d18345ab104e69027acc4159be99ecab5b39ed133f50e4', 'jane', 'doe', 'jd@nyu.edu'),
+       ('bobsmith', 'scrypt:32768:8:1$iS4cLds4Rv7bBDKT$95c1102c6457edb3d5bfde595e7ce90740563b924d9fccd0dc31f87b57d48cefd35c283a43d331c575d18345ab104e69027acc4159be99ecab5b39ed133f50e4', 'bob', 'smith', 'bs@nyu.edu'),
+       ('yourname', 'scrypt:32768:8:1$iS4cLds4Rv7bBDKT$95c1102c6457edb3d5bfde595e7ce90740563b924d9fccd0dc31f87b57d48cefd35c283a43d331c575d18345ab104e69027acc4159be99ecab5b39ed133f50e4', 'your', 'name', 'yn@nyu.edu');
 
 INSERT INTO Role (roleID, rDescription)
 VALUES (1, 'staff'),

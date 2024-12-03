@@ -362,12 +362,18 @@ def create_app(test_config=None):
                             NATURAL JOIN ItemIn
                             NATURAL JOIN Ordered
                             WHERE orderDate BETWEEN '{start_date}' AND '{end_date}'
-                                            )
+                                            ),
 
+                        catCounts AS (
                         select mainCategory, subCategory, count(*) as num_ordered
                         from catsOrdered
                         group by 1,2 
-                        order by num_ordered DESC limit 5
+                        )
+
+                        select mainCategory, subCategory, num_ordered
+                        from catCounts
+                        where num_ordered = (SELECT MAX(num_ordered) from catCounts)
+                        
                         """
         )
         ranked_cats = cursor.fetchall()
