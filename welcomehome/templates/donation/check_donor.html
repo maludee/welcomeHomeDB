@@ -2,7 +2,10 @@
     <head>
         {% include 'navbar.html' %}
     </head>
+    <title>Accept a Donation</title>
     <body>
+
+        <h1>Accept a Donation</h1>
         <p>Enter the donor's username to begin registering a donation: </p>
         <form action="/check_donor" method="POST">
             <input type = "text" name="donor_username" required/></br>

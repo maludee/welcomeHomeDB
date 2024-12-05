@@ -9,9 +9,11 @@
         </style>
     </head>
     <body>
+        <h1>Your tasks</h1>
         <p>Hi {{ current_user.username }}, here are your tasks: </p>
     
         {% if staff_data %}
+        <h2>Staff Tasks</h2>
         <table class="table">
 			<tr>
                 {% for column in columns %}
@@ -30,6 +32,7 @@
         {% endif %}
 
         {% if volunteer_data %}
+        <h2>Volunteer Tasks</h2>
         <table class="table">
 			<tr>
                 {% for column in columns %}
@@ -48,6 +51,7 @@
         {% endif %}
 
         {% if client_data %}
+        <h2>Client Tasks</h2>
         <table class="table">
 			<tr>
                 {% for column in columns %}
