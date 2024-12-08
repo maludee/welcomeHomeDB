@@ -349,11 +349,8 @@ def create_app(test_config=None):
             "SELECT min(orderdate) as start_date, max(orderdate) as end_date FROM ordered"
         )
         start_end_date = cursor.fetchall()
-        print(start_end_date)
         default_start_date = (start_end_date[0][0]).strftime("%Y-%m-%d")
         default_end_date = (start_end_date[0][1]).strftime("%Y-%m-%d")
-        print(default_start_date)
-        print(default_end_date)
 
         start_date = request.args.get("start_date", default_start_date)
         end_date = request.args.get("end_date", default_end_date)
