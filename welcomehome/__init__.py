@@ -319,6 +319,7 @@ def create_app(test_config=None):
                             SELECT 
                                 o.orderID, 
                                 o.orderDate, 
+                                supervisor,
                                 numItems,
                                 case when d.status is NULL then "not delivered" else status end as status
                             FROM `Ordered` o
